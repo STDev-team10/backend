@@ -25,7 +25,7 @@ def _get_client() -> OpenAI:
 def ask(req: AskRequest) -> dict:
     client = _get_client()
     response = client.chat.completions.create(
-        model="anthropic.claude-haiku-4-5-20251001-v1:0",
+        model="amazon.nova-micro-v1:0",
         messages=[
             {
                 "role": "system",
