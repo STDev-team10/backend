@@ -8,7 +8,7 @@ from pydantic import BaseModel
 router = APIRouter(tags=["ask"])
 
 SYSTEM_PROMPT = "너는 화학 학습 앱의 AI 튜터야. 한국어로 2~3문장, 중학생도 이해할 수 있게 짧고 흥미롭게 설명해."
-MODEL_ID = "amazon.nova-micro-v1:0"
+MODEL_ID = "apac.amazon.nova-micro-v1:0"
 
 
 class AskRequest(BaseModel):
