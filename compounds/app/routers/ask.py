@@ -25,10 +25,10 @@ def _get_client() -> OpenAI:
 def ask(req: AskRequest) -> dict:
     client = _get_client()
     response = client.chat.completions.create(
-        model="amazon.nova-lite-v1:0",
+        model="anthropic.claude-haiku-4-5-20251001-v1:0",
         messages=[
             {
-                "role": "developer",
+                "role": "system",
                 "content": "너는 화학 학습 앱의 AI 튜터야. 한국어로 2~3문장, 중학생도 이해할 수 있게 짧고 흥미롭게 설명해.",
             },
             {"role": "user", "content": req.question},
