@@ -43,3 +43,14 @@ def init_db() -> None:
                 FOREIGN KEY (compound_id) REFERENCES compounds (id)
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS time_attack_records (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                username TEXT NOT NULL,
+                play_mode TEXT NOT NULL,
+                difficulty TEXT NOT NULL,
+                clear_time_ms INTEGER NOT NULL,
+                cleared_at TEXT NOT NULL DEFAULT (datetime('now'))
+            )
+        """)

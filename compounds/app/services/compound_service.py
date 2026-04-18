@@ -1,5 +1,12 @@
 from ..repositories import compound_repository
-from ..schemas.compound import CompoundCreate, CompoundDetail, CompoundPatch
+from ..schemas.compound import (
+    CompoundCreate,
+    CompoundDetail,
+    CompoundPatch,
+    TimeAttackLeaderboardResponse,
+    TimeAttackRankingEntry,
+    TimeAttackRecordCreate,
+)
 
 
 def list_compounds(difficulty: str | None = None) -> list[CompoundDetail]:
@@ -38,3 +45,44 @@ def list_unlocked_compound_ids(user_id: int) -> list[str]:
 
 def unlock_compound_for_user(user_id: int, compound_id: str) -> bool | None:
     return compound_repository.unlock_compound_for_user(user_id, compound_id)
+
+
+def create_time_attack_record(user_id: int, username: str, body: TimeAttackRecordCreate) -> tuple[int, int, bool]:
+    record_id = compound_repository.create_time_attack_record(
+        user_id=user_id,
+        username=username,
+        play_mode=body.play_mode,
+        difficulty=body.difficulty,
+        clear_time_ms=body.clear_time_ms,
+    )
+    personal_best = compound_repository.get_time_attack_personal_best(user_id, body.play_mode, body.difficulty)
+    if not personal_best:
+        raise ValueError("personal best was not created")
+    is_personal_best = int(personal_best["id"]) == record_id
+    return record_id, int(personal_best["rank"]), is_personal_best
+
+
+def list_time_attack_rankings(play_mode: str, difficulty: str, limit: int = 10) -> list[TimeAttackRankingEntry]:
+    return [
+        TimeAttackRankingEntry(**item)
+        for item in compound_repository.list_time_attack_rankings(play_mode, difficulty, limit)
+    ]
+
+
+def get_time_attack_personal_best(user_id: int, play_mode: str, difficulty: str) -> TimeAttackRankingEntry | None:
+    item = compound_repository.get_time_attack_personal_best(user_id, play_mode, difficulty)
+    if not item:
+        return None
+    return TimeAttackRankingEntry(**item)
+
+
+def get_time_attack_leaderboard(
+    play_mode: str,
+    difficulty: str,
+    user_id: int | None = None,
+    limit: int = 5,
+) -> TimeAttackLeaderboardResponse:
+    items = list_time_attack_rankings(play_mode, difficulty, limit)
+    my_item = get_time_attack_personal_best(user_id, play_mode, difficulty) if user_id is not None else None
+    total = compound_repository.count_time_attack_rankings(play_mode, difficulty)
+    return TimeAttackLeaderboardResponse(items=items, total=total, my_item=my_item)

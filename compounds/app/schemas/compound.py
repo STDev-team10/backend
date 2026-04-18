@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -49,3 +51,47 @@ class CompoundUnlockResponse(BaseModel):
 class CompoundUnlockListResponse(BaseModel):
     items: list[str]
     total: int
+
+
+PlayMode = Literal["normal", "hardcore"]
+Difficulty = Literal["easy", "medium", "hard", "mimic"]
+
+
+class TimeAttackRecordCreate(BaseModel):
+    play_mode: PlayMode
+    difficulty: Difficulty
+    clear_time_ms: int = Field(gt=0)
+
+
+class TimeAttackRecordResponse(BaseModel):
+    record_id: int
+    play_mode: PlayMode
+    difficulty: Difficulty
+    clear_time_ms: int
+    rank: int
+    is_personal_best: bool
+
+
+class TimeAttackRankingEntry(BaseModel):
+    rank: int
+    user_id: int
+    username: str
+    play_mode: PlayMode
+    difficulty: Difficulty
+    clear_time_ms: int
+    cleared_at: str
+
+
+class TimeAttackRankingListResponse(BaseModel):
+    items: list[TimeAttackRankingEntry]
+    total: int
+
+
+class TimeAttackPersonalBestResponse(BaseModel):
+    item: TimeAttackRankingEntry | None
+
+
+class TimeAttackLeaderboardResponse(BaseModel):
+    items: list[TimeAttackRankingEntry]
+    total: int
+    my_item: TimeAttackRankingEntry | None
