@@ -1,0 +1,36 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Virtual environments
+.venv/
+*/.venv/
+
+# Local Python/version files
+.python-version
+*/.python-version
+
+# SQLite and local data
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage and test artifacts
+.coverage
+coverage.xml
+htmlcov/
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
