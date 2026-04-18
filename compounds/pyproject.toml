@@ -5,6 +5,7 @@ description = "Compound catalog service"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.136.0",
+    "python-jose[cryptography]>=3.5.0",
     "uvicorn[standard]>=0.44.0",
 ]
 

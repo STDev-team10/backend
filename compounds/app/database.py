@@ -34,3 +34,12 @@ def init_db() -> None:
                 updated_at TEXT NOT NULL DEFAULT (datetime('now'))
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_compound_unlocks (
+                user_id INTEGER NOT NULL,
+                compound_id TEXT NOT NULL,
+                unlocked_at TEXT NOT NULL DEFAULT (datetime('now')),
+                PRIMARY KEY (user_id, compound_id),
+                FOREIGN KEY (compound_id) REFERENCES compounds (id)
+            )
+        """)

@@ -1,9 +1,12 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from ..dependencies import current_user
 from ..schemas.compound import (
     CompoundCreate,
     CompoundDetail,
     CompoundListResponse,
+    CompoundUnlockListResponse,
+    CompoundUnlockResponse,
     CompoundPatch,
     CompoundSeedResponse,
 )
@@ -44,3 +47,18 @@ def update_compound(compound_id: str, body: CompoundPatch) -> CompoundDetail:
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="compound not found")
     return updated
+
+
+@router.get("/unlocks/me", response_model=CompoundUnlockListResponse)
+def list_my_unlocked_compounds(user: dict = Depends(current_user)) -> CompoundUnlockListResponse:
+    user_id = int(user["sub"])
+    items = compound_service.list_unlocked_compound_ids(user_id)
+    return CompoundUnlockListResponse(items=items, total=len(items))
+
+
+@router.post("/{compound_id}/unlock", response_model=CompoundUnlockResponse)
+def unlock_compound(compound_id: str, user: dict = Depends(current_user)) -> CompoundUnlockResponse:
+    unlocked = compound_service.unlock_compound_for_user(int(user["sub"]), compound_id)
+    if unlocked is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="compound not found")
+    return CompoundUnlockResponse(compound_id=compound_id, unlocked=unlocked)

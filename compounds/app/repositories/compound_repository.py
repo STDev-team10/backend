@@ -122,3 +122,33 @@ def update_compound(compound_id: str, updates: dict[str, Any]) -> dict[str, Any]
             ),
         )
     return get_compound_by_id(compound_id)
+
+
+def list_unlocked_compound_ids(user_id: int) -> list[str]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            """
+            SELECT compound_id
+            FROM user_compound_unlocks
+            WHERE user_id = ?
+            ORDER BY unlocked_at, compound_id
+            """,
+            (user_id,),
+        ).fetchall()
+    return [str(row["compound_id"]) for row in rows]
+
+
+def unlock_compound_for_user(user_id: int, compound_id: str) -> bool | None:
+    compound = get_compound_by_id(compound_id)
+    if not compound:
+        return None
+
+    with get_conn() as conn:
+        cursor = conn.execute(
+            """
+            INSERT OR IGNORE INTO user_compound_unlocks (user_id, compound_id)
+            VALUES (?, ?)
+            """,
+            (user_id, compound_id),
+        )
+    return cursor.rowcount > 0

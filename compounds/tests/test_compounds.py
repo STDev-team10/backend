@@ -3,6 +3,7 @@ from importlib import import_module, reload
 from pathlib import Path
 
 from fastapi.testclient import TestClient
+from jose import jwt
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
@@ -84,3 +85,37 @@ def test_create_and_patch_compound(monkeypatch, tmp_path: Path) -> None:
     )
     assert patch_response.status_code == 200
     assert patch_response.json()["difficulty"] == "medium"
+
+
+def test_unlock_compound_for_authenticated_user(monkeypatch, tmp_path: Path) -> None:
+    db_path = tmp_path / "compounds.db"
+    seed_path = tmp_path / "compoundGameList.ts"
+    _write_seed_file(seed_path)
+
+    monkeypatch.setenv("DATABASE_PATH", str(db_path))
+    monkeypatch.setenv("COMPOUND_SEED_PATH", str(seed_path))
+    monkeypatch.setenv("JWT_SECRET", "test-secret")
+
+    client = TestClient(_load_app())
+    token = jwt.encode({"sub": "7", "username": "luke"}, "test-secret", algorithm="HS256")
+
+    unlock_response = client.post(
+        "/api/compounds/water/unlock",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert unlock_response.status_code == 200
+    assert unlock_response.json() == {"compound_id": "water", "unlocked": True}
+
+    list_response = client.get(
+        "/api/compounds/unlocks/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert list_response.status_code == 200
+    assert list_response.json() == {"items": ["water"], "total": 1}
+
+    repeat_unlock_response = client.post(
+        "/api/compounds/water/unlock",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert repeat_unlock_response.status_code == 200
+    assert repeat_unlock_response.json() == {"compound_id": "water", "unlocked": False}

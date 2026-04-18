@@ -33,6 +33,7 @@ services:
       dockerfile: compounds/Dockerfile
     container_name: compounds-service
     environment:
+      JWT_SECRET: dev-secret
       DATABASE_PATH: /app/data/data.db
       COMPOUND_SEED_PATH: /app/compoundGameList.ts
     expose:

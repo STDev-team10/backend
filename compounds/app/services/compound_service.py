@@ -30,3 +30,11 @@ def update_compound(compound_id: str, body: CompoundPatch) -> CompoundDetail | N
     if not updated:
         return None
     return CompoundDetail(**updated)
+
+
+def list_unlocked_compound_ids(user_id: int) -> list[str]:
+    return compound_repository.list_unlocked_compound_ids(user_id)
+
+
+def unlock_compound_for_user(user_id: int, compound_id: str) -> bool | None:
+    return compound_repository.unlock_compound_for_user(user_id, compound_id)

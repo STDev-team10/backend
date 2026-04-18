@@ -39,3 +39,13 @@ class CompoundListResponse(BaseModel):
 
 class CompoundSeedResponse(BaseModel):
     imported: int
+
+
+class CompoundUnlockResponse(BaseModel):
+    compound_id: str
+    unlocked: bool
+
+
+class CompoundUnlockListResponse(BaseModel):
+    items: list[str]
+    total: int
