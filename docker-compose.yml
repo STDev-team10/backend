@@ -37,6 +37,8 @@ services:
       DATABASE_PATH: /app/data/data.db
       COMPOUND_SEED_PATH: /app/compoundGameList.ts
       AWS_BEARER_TOKEN_BEDROCK: ${AWS_BEARER_TOKEN_BEDROCK}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     expose:
       - "8000"
     volumes:
