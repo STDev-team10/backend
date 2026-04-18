@@ -25,7 +25,7 @@ def _get_client() -> OpenAI:
 def ask(req: AskRequest) -> dict:
     client = _get_client()
     response = client.chat.completions.create(
-        model="openai.gpt-oss-20b-1:0",
+        model="anthropic.claude-3-5-haiku-20241022-v1:0",
         messages=[
             {
                 "role": "developer",
