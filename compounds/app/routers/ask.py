@@ -21,7 +21,7 @@ def _get_client() -> OpenAI:
     )
 
 
-@router.post("/api/ask")
+@router.post("/ask")
 def ask(req: AskRequest) -> dict:
     client = _get_client()
     response = client.chat.completions.create(

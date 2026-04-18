@@ -36,6 +36,7 @@ services:
       JWT_SECRET: dev-secret
       DATABASE_PATH: /app/data/data.db
       COMPOUND_SEED_PATH: /app/compoundGameList.ts
+      AWS_BEARER_TOKEN_BEDROCK: ${AWS_BEARER_TOKEN_BEDROCK}
     expose:
       - "8000"
     volumes:

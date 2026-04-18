@@ -25,4 +25,4 @@ seed_compounds_if_needed()
 
 app.include_router(compounds.router)
 app.include_router(hall_of_fame.router)
-app.include_router(ask.router)
+app.include_router(ask.router, prefix="/api")
