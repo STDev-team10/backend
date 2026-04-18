@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import init_db
-from app.routers import compounds
+from app.routers import compounds, hall_of_fame
 from app.services.compound_seed_service import seed_compounds_if_needed
 
 app = FastAPI(
@@ -24,3 +24,4 @@ init_db()
 seed_compounds_if_needed()
 
 app.include_router(compounds.router)
+app.include_router(hall_of_fame.router)

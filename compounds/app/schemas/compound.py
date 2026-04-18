@@ -12,6 +12,7 @@ class CompoundBase(BaseModel):
     difficulty: str = Field(min_length=1)
     elements: dict[str, int]
     available_elements: list[str]
+    hall_of_fame_item_id: str | None = None
 
 
 class CompoundCreate(CompoundBase):

@@ -18,6 +18,34 @@ def get_conn() -> sqlite3.Connection:
     return conn
 
 
+_HALL_OF_FAME_ITEMS = [
+    ("guigeumseok", "귀금속", "빛나는 금속의 가치", "guigeumseok.png"),
+    ("dynamite", "다이너마이트", "폭발의 과학", "dynamite.png"),
+    ("radium", "라듐", "방사성 원소의 발견", "radium.png"),
+    ("lax", "락스", "강력한 세정의 화학", "lax.png"),
+    ("biso", "비소", "독성의 원소", "biso.png"),
+    ("salchungje", "살충제", "해충을 막는 화학", "salchungje.png"),
+    ("seokmyeon", "석면", "금지된 광물", "seokmyeon.png"),
+    ("alcohol", "알콜", "발효와 증류의 산물", "alcohol.png"),
+    ("sueun", "수은", "액체 금속의 비밀", "sueun.png"),
+    ("haber", "하버", "공기에서 빵을, 그리고 독가스를", "haber.png"),
+]
+
+
+def _seed_hall_of_fame_items(conn: sqlite3.Connection) -> None:
+    conn.executemany(
+        """
+        INSERT INTO hall_of_fame_items (id, title, subtitle, image_filename)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            title = excluded.title,
+            subtitle = excluded.subtitle,
+            image_filename = excluded.image_filename
+        """,
+        _HALL_OF_FAME_ITEMS,
+    )
+
+
 def init_db() -> None:
     with get_conn() as conn:
         conn.execute("""
@@ -54,3 +82,26 @@ def init_db() -> None:
                 cleared_at TEXT NOT NULL DEFAULT (datetime('now'))
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS hall_of_fame_items (
+                id TEXT PRIMARY KEY,
+                title TEXT NOT NULL,
+                subtitle TEXT NOT NULL DEFAULT '',
+                image_filename TEXT NOT NULL DEFAULT ''
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS hall_of_fame_unlocks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                item_id TEXT NOT NULL REFERENCES hall_of_fame_items(id),
+                user_id INTEGER NOT NULL,
+                username TEXT NOT NULL,
+                unlocked_at TEXT NOT NULL DEFAULT (datetime('now')),
+                UNIQUE(item_id, user_id)
+            )
+        """)
+        # migration: add hall_of_fame_item_id to compounds if not exists
+        existing = {row[1] for row in conn.execute("PRAGMA table_info(compounds)")}
+        if "hall_of_fame_item_id" not in existing:
+            conn.execute("ALTER TABLE compounds ADD COLUMN hall_of_fame_item_id TEXT")
+        _seed_hall_of_fame_items(conn)

@@ -47,12 +47,12 @@ def _load_compounds_from_seed_file(path: Path) -> list[dict]:
 
 
 def seed_compounds_if_needed() -> int:
-    if count_compounds() > 0:
-        return 0
-
     for candidate in _seed_path_candidates():
         if candidate.exists():
             compounds = _load_compounds_from_seed_file(candidate)
             return upsert_compounds(compounds)
+
+    if count_compounds() > 0:
+        return 0
 
     raise FileNotFoundError("compoundGameList.ts not found for compounds seed")

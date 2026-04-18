@@ -32,6 +32,7 @@ def _serialize(compound: dict[str, Any]) -> tuple[Any, ...]:
         normalized["difficulty"],
         json.dumps(normalized["elements"], ensure_ascii=False, sort_keys=True),
         json.dumps(normalized["available_elements"], ensure_ascii=False),
+        normalized.get("hall_of_fame_item_id"),
     )
 
 
@@ -45,6 +46,7 @@ def _deserialize(row: Any) -> dict[str, Any]:
         "difficulty": row["difficulty"],
         "elements": json.loads(row["elements_json"]),
         "available_elements": json.loads(row["available_elements_json"]),
+        "hall_of_fame_item_id": row["hall_of_fame_item_id"] if "hall_of_fame_item_id" in row.keys() else None,
     })
 
 
@@ -83,8 +85,9 @@ def upsert_compounds(compounds: list[dict[str, Any]]) -> int:
         conn.executemany(
             """
             INSERT INTO compounds (
-                id, name, formula, emoji, description, difficulty, elements_json, available_elements_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                id, name, formula, emoji, description, difficulty, elements_json, available_elements_json,
+                hall_of_fame_item_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 name = excluded.name,
                 formula = excluded.formula,
@@ -93,6 +96,7 @@ def upsert_compounds(compounds: list[dict[str, Any]]) -> int:
                 difficulty = excluded.difficulty,
                 elements_json = excluded.elements_json,
                 available_elements_json = excluded.available_elements_json,
+                hall_of_fame_item_id = excluded.hall_of_fame_item_id,
                 updated_at = datetime('now')
             """,
             [_serialize(compound) for compound in compounds],
@@ -105,8 +109,9 @@ def create_compound(compound: dict[str, Any]) -> dict[str, Any]:
         conn.execute(
             """
             INSERT INTO compounds (
-                id, name, formula, emoji, description, difficulty, elements_json, available_elements_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                id, name, formula, emoji, description, difficulty, elements_json, available_elements_json,
+                hall_of_fame_item_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             _serialize(compound),
         )
