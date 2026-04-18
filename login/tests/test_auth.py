@@ -76,6 +76,40 @@ def test_login_rejects_invalid_password(monkeypatch, tmp_path: Path) -> None:
     assert response.json()["detail"] == "invalid credentials"
 
 
+def test_add_points_returns_latest_total(monkeypatch, tmp_path: Path) -> None:
+    db_path = tmp_path / "test.db"
+    monkeypatch.setenv("DATABASE_PATH", str(db_path))
+    monkeypatch.setenv("JWT_SECRET", "test-secret")
+
+    from main import app
+    from app.database import init_db
+
+    init_db()
+    client = TestClient(app)
+
+    signup_response = client.post(
+        "/api/auth/signup",
+        json={"username": "aha", "password": "secret123"},
+    )
+    token = signup_response.json()["token"]
+
+    first = client.post(
+        "/api/auth/points",
+        json={"earned_points": 500},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert first.status_code == 200
+    assert first.json() == {"points": 500}
+
+    second = client.post(
+        "/api/auth/points",
+        json={"earned_points": 180},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert second.status_code == 200
+    assert second.json() == {"points": 680}
+
+
 def test_points_rankings_return_top_five_and_my_rank(monkeypatch, tmp_path: Path) -> None:
     db_path = tmp_path / "test.db"
     monkeypatch.setenv("DATABASE_PATH", str(db_path))

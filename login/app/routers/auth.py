@@ -41,6 +41,21 @@ class MeResponse(BaseModel):
     points: int
 
 
+class PointsUpdateBody(BaseModel):
+    earned_points: int
+
+    @field_validator("earned_points")
+    @classmethod
+    def earned_points_non_negative(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError("earned_points must be non-negative")
+        return v
+
+
+class PointsResponse(BaseModel):
+    points: int
+
+
 class PointsRankingEntry(BaseModel):
     rank: int
     user_id: int
@@ -92,6 +107,25 @@ def me(user: dict = Depends(current_user)) -> MeResponse:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="user not found")
 
     return MeResponse(user_id=int(row["id"]), username=str(row["username"]), points=int(row["points"]))
+
+
+@router.post("/points", response_model=PointsResponse)
+def add_points(body: PointsUpdateBody, user: dict = Depends(current_user)) -> PointsResponse:
+    with get_conn() as conn:
+        row = conn.execute(
+            """
+            UPDATE users
+            SET points = points + ?
+            WHERE id = ?
+            RETURNING points
+            """,
+            (body.earned_points, int(user["sub"])),
+        ).fetchone()
+
+    if not row:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="user not found")
+
+    return PointsResponse(points=int(row["points"]))
 
 
 def _list_points_rankings(limit: int) -> list[dict]:
